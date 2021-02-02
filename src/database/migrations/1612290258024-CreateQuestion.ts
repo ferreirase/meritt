@@ -43,7 +43,7 @@ export default class CreateQuestion1612290258024 implements MigrationInterface {
     );
 
     await queryRunner.createForeignKey(
-      'appointments',
+      'questions',
       new TableForeignKey({
         name: 'Exam',
         columnNames: ['exam_id'],
