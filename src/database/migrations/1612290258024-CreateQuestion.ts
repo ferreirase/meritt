@@ -1,10 +1,15 @@
-import { MigrationInterface, QueryRunner, Table } from 'typeorm';
+import {
+  QueryRunner,
+  MigrationInterface,
+  Table,
+  TableForeignKey,
+} from 'typeorm';
 
-export default class CreateUsers1591618330801 implements MigrationInterface {
+export default class CreateQuestion1612290258024 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'users',
+        name: 'questions',
         columns: [
           {
             name: 'id',
@@ -14,20 +19,14 @@ export default class CreateUsers1591618330801 implements MigrationInterface {
             default: 'uuid_generate_v4()',
           },
           {
-            name: 'name',
-            type: 'varchar',
-            isNullable: false,
+            name: 'exam_id',
+            type: 'uuid',
+            isNullable: true,
           },
           {
-            name: 'password',
+            name: 'statement',
             type: 'varchar',
             isNullable: false,
-          },
-          {
-            name: 'email',
-            type: 'varchar',
-            isNullable: false,
-            isUnique: true,
           },
           {
             name: 'created_at',
@@ -42,9 +41,21 @@ export default class CreateUsers1591618330801 implements MigrationInterface {
         ],
       }),
     );
+
+    await queryRunner.createForeignKey(
+      'appointments',
+      new TableForeignKey({
+        name: 'Exam',
+        columnNames: ['exam_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'exams',
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('users');
+    await queryRunner.dropTable('questions');
   }
 }
