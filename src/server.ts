@@ -11,8 +11,7 @@ dotEnv.config();
 
 const app = express();
 
-app.use([cors(), routes]);
-app.use(express.json());
+app.use(express.json(), [cors(), routes]);
 
 app.use((err: Error, request: Request, response: Response, _: NextFunction) => {
   if (err instanceof AppError) {
