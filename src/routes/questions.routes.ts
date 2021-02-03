@@ -12,13 +12,17 @@ const questionRoutes = Router();
 questionRoutes.get('/', async (_: Request, res: Response) => {
   const questionRepository = getRepository(Question);
 
-  const questions: Array<Question> = await questionRepository.find({
-    select: ['id', 'statement'],
-  });
+  try {
+    const questions: Array<Question> = await questionRepository.find({
+      select: ['id', 'statement'],
+    });
 
-  return res.status(200).json({
-    questions,
-  });
+    return res.status(200).json({
+      questions,
+    });
+  } catch (error) {
+    throw new AppError({ message: `${error.message}`, statusCode: 400 });
+  }
 });
 
 questionRoutes.post('/', async (req: Request, res: Response) => {

@@ -25,11 +25,11 @@ class Question {
   statement: string;
 
   @ManyToOne(() => Exam, exam => exam.questions)
-  @OneToMany(() => Option, option => option.question)
-  options: Option[];
-
   @JoinColumn({ name: 'exam_id' })
   exam: Exam;
+
+  @OneToMany(() => Option, option => option.question)
+  options: Option[];
 
   @CreateDateColumn()
   created_at: Date;

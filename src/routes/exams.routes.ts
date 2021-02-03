@@ -10,6 +10,7 @@ import QuestionInterface from '../interfaces/question';
 interface QuestionReturn extends QuestionInterface {
   created_at?: Date;
   updated_at?: Date;
+  exam_id?: string;
 }
 
 const examRoutes = Router();
@@ -17,21 +18,26 @@ const examRoutes = Router();
 examRoutes.get('/', async (_: Request, res: Response) => {
   const examRepository = getRepository(Exam);
 
-  const exams: Array<Exam> = await examRepository.find({
-    select: ['id', 'name', 'description', 'type'],
-    relations: ['questions'],
-  });
+  try {
+    const exams: Array<Exam> = await examRepository.find({
+      select: ['id', 'name', 'description', 'type'],
+      relations: ['questions', 'questions.options'],
+    });
 
-  exams.map(exam =>
-    exam.questions.map((question: QuestionReturn) => {
-      delete question.created_at;
-      delete question.updated_at;
-    }),
-  );
+    exams.map(exam =>
+      exam.questions.map((question: QuestionReturn) => {
+        delete question.created_at;
+        delete question.updated_at;
+        delete question.exam_id;
+      }),
+    );
 
-  return res.status(200).json({
-    exams,
-  });
+    return res.status(200).json({
+      exams,
+    });
+  } catch (error) {
+    throw new AppError({ message: `${error.message}`, statusCode: 400 });
+  }
 });
 
 examRoutes.post('/', async (req: Request, res: Response) => {
