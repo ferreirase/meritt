@@ -6,6 +6,7 @@ import Question from '../models/Question';
 import QuestionInterface from '../interfaces/question';
 import CreateQuestionService from '../services/Questions/CreateQuestionService';
 import UpdateQuestionService from '../services/Questions/UpdateQuestionService';
+import DeleteQuestionService from '../services/Questions/DeleteQuestionService';
 import AppError from '../errors/AppError';
 
 const questionRoutes = Router();
@@ -73,6 +74,24 @@ questionRoutes.put('/', async (req: Request, res: Response) => {
   );
 
   return res.status(200).json(questionUpdated);
+});
+
+questionRoutes.delete('/', async (req: Request, res: Response) => {
+  const deleteQuestion = new DeleteQuestionService();
+
+  const schema = Yup.object().shape({
+    question_id: Yup.string().required('Question ID is required'),
+  });
+
+  await schema.isValid(req.body).then(valid => {
+    if (!valid) {
+      throw new AppError({ message: 'Check fields submited', statusCode: 404 });
+    }
+  });
+
+  const questionDeleted = await deleteQuestion.execute(req.body?.question_id);
+
+  return res.status(200).json(questionDeleted);
 });
 
 export default questionRoutes;
