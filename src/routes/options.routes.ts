@@ -5,6 +5,7 @@ import { getRepository } from 'typeorm';
 import Option from '../models/Option';
 import OptionInterface from '../interfaces/option';
 import CreateOptionService from '../services/Options/CreateOptionService';
+import DeleteOptionService from '../services/Options/DeleteOptionService';
 import AppError from '../errors/AppError';
 
 const optionRoutes = Router();
@@ -49,6 +50,24 @@ optionRoutes.post('/', async (req: Request, res: Response) => {
   });
 
   return res.status(200).json(newOption);
+});
+
+optionRoutes.delete('/', async (req: Request, res: Response) => {
+  const deleteOption = new DeleteOptionService();
+
+  const schema = Yup.object().shape({
+    option_id: Yup.string().required('Question ID is required'),
+  });
+
+  await schema.isValid(req.body).then(valid => {
+    if (!valid) {
+      throw new AppError({ message: 'Check fields submited', statusCode: 404 });
+    }
+  });
+
+  const optionDeleted = await deleteOption.execute(req.body?.option_id);
+
+  return res.status(200).json(optionDeleted);
 });
 
 export default optionRoutes;
