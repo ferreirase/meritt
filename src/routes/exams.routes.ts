@@ -6,13 +6,6 @@ import CreateExamService from '../services/Exams/CreateExamService';
 import UpdateExamService from '../services/Exams/UpdateExamService';
 import AppError from '../errors/AppError';
 import Exam from '../models/Exam';
-import QuestionInterface from '../interfaces/question';
-
-interface QuestionReturn extends QuestionInterface {
-  created_at?: Date;
-  updated_at?: Date;
-  exam_id?: string;
-}
 
 const examRoutes = Router();
 
@@ -20,18 +13,14 @@ examRoutes.get('/', async (_: Request, res: Response) => {
   const examRepository = getRepository(Exam);
 
   try {
-    const exams: Array<Exam> = await examRepository.find({
-      select: ['id', 'name', 'description', 'type'],
-      relations: ['questions', 'questions.options'],
-    });
-
-    exams.map(exam =>
-      exam.questions.map((question: QuestionReturn) => {
-        delete question.created_at;
-        delete question.updated_at;
-        delete question.exam_id;
-      }),
-    );
+    const exams = await examRepository
+      .createQueryBuilder('exam')
+      .select(['exam.id', 'exam.name', 'exam.description', 'exam.type'])
+      .addSelect(['question.id', 'question.statement'])
+      .addSelect(['option.id', 'option.key', 'option.value', 'option.correct'])
+      .leftJoin('exam.questions', 'question')
+      .leftJoin('question.options', 'option')
+      .getMany();
 
     return res.status(200).json({
       exams,
