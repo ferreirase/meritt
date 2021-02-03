@@ -1,5 +1,5 @@
 export default interface Option {
-  id: string;
+  id?: string;
   key: string;
   value: string;
   correct: boolean;
