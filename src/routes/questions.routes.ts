@@ -1,8 +1,9 @@
 /* eslint-disable array-callback-return */
 import { Router, Request, Response } from 'express';
 import * as Yup from 'yup';
-import { getRepository } from 'typeorm';
+import { getRepository, getCustomRepository } from 'typeorm';
 import Question from '../models/Question';
+import QuestionRepository from '../repositories/QuestionsRepository';
 import QuestionInterface from '../interfaces/question';
 import CreateQuestionService from '../services/Questions/CreateQuestionService';
 import UpdateQuestionService from '../services/Questions/UpdateQuestionService';
@@ -17,6 +18,7 @@ questionRoutes.get('/', async (_: Request, res: Response) => {
   try {
     const questions: Array<Question> = await questionRepository.find({
       select: ['id', 'statement'],
+      relations: ['options'],
     });
 
     return res.status(200).json({
@@ -25,6 +27,16 @@ questionRoutes.get('/', async (_: Request, res: Response) => {
   } catch (error) {
     throw new AppError({ message: `${error.message}`, statusCode: 400 });
   }
+});
+
+questionRoutes.get('/:exam_id', async (req: Request, res: Response) => {
+  const questionRepository = getCustomRepository(QuestionRepository);
+
+  const result = await questionRepository.findByQuestion(
+    `${req.params?.exam_id}`,
+  );
+
+  return res.status(200).json(result);
 });
 
 questionRoutes.post('/', async (req: Request, res: Response) => {
