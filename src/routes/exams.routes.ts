@@ -1,32 +1,21 @@
 /* eslint-disable array-callback-return */
 import { Router, Request, Response } from 'express';
 import * as Yup from 'yup';
-import { getRepository } from 'typeorm';
+import { getCustomRepository } from 'typeorm';
 import CreateExamService from '../services/Exams/CreateExamService';
 import UpdateExamService from '../services/Exams/UpdateExamService';
 import DeleteExamService from '../services/Exams/DeleteExamService';
 import AppError from '../errors/AppError';
-import Exam from '../models/Exam';
+import ExamRepository from '../repositories/ExamRepository';
 
 const examRoutes = Router();
 
 examRoutes.get('/', async (_: Request, res: Response) => {
-  try {
-    const exams = await getRepository(Exam)
-      .createQueryBuilder('exam')
-      .select(['exam.id', 'exam.name', 'exam.description', 'exam.type'])
-      .addSelect(['question.id', 'question.statement'])
-      .addSelect(['option.id', 'option.key', 'option.value', 'option.correct'])
-      .leftJoin('exam.questions', 'question')
-      .leftJoin('question.options', 'option')
-      .getMany();
+  const examRepository = getCustomRepository(ExamRepository);
 
-    return res.status(200).json({
-      exams,
-    });
-  } catch (error) {
-    throw new AppError({ message: `${error.message}`, statusCode: 400 });
-  }
+  const exams = await examRepository.findAllWithRelations();
+
+  return res.status(200).json(exams);
 });
 
 examRoutes.post('/', async (req: Request, res: Response) => {
