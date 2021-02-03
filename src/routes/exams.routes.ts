@@ -1,9 +1,38 @@
+/* eslint-disable array-callback-return */
 import { Router, Request, Response } from 'express';
 import * as Yup from 'yup';
+import { getRepository } from 'typeorm';
 import CreateExamService from '../services/Exams/CreateExameService';
 import AppError from '../errors/AppError';
+import Exam from '../models/Exam';
+import QuestionInterface from '../interfaces/question';
+
+interface QuestionReturn extends QuestionInterface {
+  created_at?: Date;
+  updated_at?: Date;
+}
 
 const examRoutes = Router();
+
+examRoutes.get('/', async (_: Request, res: Response) => {
+  const examRepository = getRepository(Exam);
+
+  const exams: Array<Exam> = await examRepository.find({
+    select: ['id', 'name', 'description', 'type'],
+    relations: ['questions'],
+  });
+
+  exams.map(exam =>
+    exam.questions.map((question: QuestionReturn) => {
+      delete question.created_at;
+      delete question.updated_at;
+    }),
+  );
+
+  return res.status(200).json({
+    exams,
+  });
+});
 
 examRoutes.post('/', async (req: Request, res: Response) => {
   const schema = Yup.object().shape({
