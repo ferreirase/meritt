@@ -23,8 +23,21 @@ class CreateQuestionService {
         },
       });
 
+      const questionExists = await questionRepository.findOne({
+        where: {
+          statement,
+        },
+      });
+
       if (!examExists) {
-        throw new AppError({ message: 'Exam not found', statusCode: 401 });
+        throw new AppError({ message: 'Exam not found', statusCode: 400 });
+      }
+
+      if (questionExists) {
+        throw new AppError({
+          message: 'Question statement already exists',
+          statusCode: 400,
+        });
       }
 
       const newQuestion = questionRepository.create({
