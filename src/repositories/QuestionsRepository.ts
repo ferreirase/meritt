@@ -6,22 +6,22 @@ import shuffleArray from '../functions/shuffleArray';
 
 @EntityRepository(Question)
 class QuestionsRepository extends Repository<Question> {
-  public async findByQuestion(exam_id: string): Promise<Object | null> {
-    const examRepository = getRepository(Exam);
+  public async findOptionsByQuestion(question_id: string): Promise<Object | null> {
 
     try {
-      const examExists = await examRepository.findOne({
+      const questionExists = await this.findOne({
         where: {
-          id: exam_id,
+          id: question_id,
         },
       });
 
-      if (!examExists) {
-        throw new AppError({ message: 'Exam not found', statusCode: 400 });
+      if (!questionExists) {
+        throw new AppError({ message: 'Question not found', statusCode: 400 });
       }
 
-      const questions = await this.createQueryBuilder('question')
-        .where('question.exam_id = :id', { id: exam_id })
+
+      const question = await this.createQueryBuilder('question')
+        .where('question.id = :id', { id: question_id })
         .select(['question.id', 'question.statement'])
         .addSelect([
           'option.id',
@@ -30,21 +30,14 @@ class QuestionsRepository extends Repository<Question> {
           'option.correct',
         ])
         .leftJoin('question.options', 'option')
-        .getMany();
+        .getOne();
 
-      const questionsFormatted = questions.map((question: Question) => {
-        return {
-          statement: question.statement,
-          options: shuffleArray(
-            question.options.sort(() => Math.random() - 0.5),
-          ),
-        };
-      });
 
       return (
         {
-          exam_id,
-          questions: questionsFormatted,
+          question_id,
+          statement: question?.statement,
+          options: shuffleArray(question?.options.sort(() => Math.random() - 0.5)),
         } || null
       );
     } catch (error) {

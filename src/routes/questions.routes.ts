@@ -32,7 +32,7 @@ questionRoutes.get('/', async (_: Request, res: Response) => {
 questionRoutes.get('/:exam_id', async (req: Request, res: Response) => {
   const questionRepository = getCustomRepository(QuestionRepository);
 
-  const result = await questionRepository.findByQuestion(
+  const result = await questionRepository.findOptionsByQuestion(
     `${req.params?.exam_id}`,
   );
 
