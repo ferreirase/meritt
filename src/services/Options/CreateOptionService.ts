@@ -28,7 +28,7 @@ class CreateOptionService {
       const optionExists = await optionRepository
         .createQueryBuilder('option')
         .where('option.key = :key', { key })
-        .orWhere(
+        .andWhere(
           new Brackets(qb => {
             qb.where('option.value = :value', { value });
           }),

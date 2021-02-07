@@ -1,3 +1,9 @@
-import { createConnection } from 'typeorm';
+import { createConnection, Connection } from 'typeorm';
 
-createConnection();
+async function InitializeTypeORM(): Promise<Connection> {
+  const connection = await createConnection('default');
+
+  return connection;
+}
+
+export default InitializeTypeORM;

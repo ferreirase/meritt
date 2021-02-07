@@ -32,11 +32,19 @@ class QuestionsRepository extends Repository<Question> {
         .leftJoin('question.options', 'option')
         .getMany();
 
+      const questionsFormatted = questions.map((question: Question) => {
+        return {
+          statement: question.statement,
+          options: shuffleArray(
+            question.options.sort(() => Math.random() - 0.5),
+          ),
+        };
+      });
+
       return (
         {
           exam_id,
-          statement: questions[0].statement,
-          questions: shuffleArray(questions[0].options),
+          questions: questionsFormatted,
         } || null
       );
     } catch (error) {

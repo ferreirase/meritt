@@ -4,10 +4,11 @@ import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import 'express-async-errors';
 import routes from './routes/index';
-import './database';
+import InitializeTypeORM from './database';
 import AppError from './errors/AppError';
 
 dotEnv.config();
+InitializeTypeORM();
 
 const app = express();
 
